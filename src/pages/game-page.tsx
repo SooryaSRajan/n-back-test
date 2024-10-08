@@ -23,20 +23,20 @@ const Instructions: React.FC<InstructionsProps> = ({ countdown }) => {
 
 const GameComponent: React.FC = () => {
     const [characters, setCharacters] = useState<string[]>([]);
+    const [solution, setSolution] = useState<boolean[]>([]); // Solution array to track true/false for main letters
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [currentCharacter, setCurrentCharacter] = useState<string | null>(null);
-    const [characterToRemember, setCharacterToRemember] = useState<string | null>(null);
     const [seenLetters, setSeenLetters] = useState<boolean[]>([]);
     const [countdown, setCountdown] = useState<number>(3); // Countdown state
 
     useEffect(() => {
-        const generatedCharacters = generateCharacterArray();
-        setCharacters(generatedCharacters);
-        setSeenLetters(new Array(generatedCharacters.length).fill(false)); // Initialize seen letters array
+        const { sequence, solution } = generateCharacterArray(); // Get the sequence and solution array
+        setCharacters(sequence);
+        setSolution(solution);
+        setSeenLetters(new Array(sequence.length).fill(false)); // Initialize seen letters array
 
         // Set the first character to be displayed initially
-        setCurrentCharacter(generatedCharacters[0]);
-        setCharacterToRemember(getLetterToRemember(generatedCharacters, 0));
+        setCurrentCharacter(sequence[0]);
 
         // Start countdown timer for auto-changing the letter
         const interval = setInterval(() => {
@@ -62,9 +62,8 @@ const GameComponent: React.FC = () => {
                 return prevIndex;
             }
 
-            // Update current character and character to remember
+            // Update current character
             setCurrentCharacter(characters[newIndex]);
-            setCharacterToRemember(getLetterToRemember(characters, newIndex));
 
             return newIndex;
         });
@@ -82,14 +81,15 @@ const GameComponent: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen bg-gray-900">
+        <div className="flex flex-col justify-center items-center h-screen">
             <div className="text-center mb-8">
                 <h1 className="text-8xl font-bold text-white">{currentCharacter}</h1>
                 <p className="text-2xl mt-4 text-gray-300">Letters left: {characters.length - currentIndex - 1}</p>
+                <p className="text-lg text-gray-400 mt-2">Letters {solution}</p>
                 <p className="text-lg text-gray-400 mt-2">Next letter in {countdown}s</p>
             </div>
 
-            <p className="text-xl mb-4 text-gray-400">Did you see this letter previously?</p>
+            <p className="text-xl mb-4 text-gray-400">Is this part of the main sequence?</p>
 
             <div className="flex space-x-4">
                 <button
@@ -109,35 +109,40 @@ const GameComponent: React.FC = () => {
     );
 };
 
-// Function to get the letter to remember
-function getLetterToRemember(sequence: string[], currentIndex: number): string | null {
-    let closestRepeatIndex = Math.floor(currentIndex / 4) * 4 + 2;
-
-    if (currentIndex >= closestRepeatIndex) {
-        return sequence[closestRepeatIndex];
-    }
-
-    return null;
-}
-
-// Function to generate the character sequence
-function generateCharacterArray(): string[] {
+// Updated generateCharacterArray function
+function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const randomLetter = () => alphabet[Math.floor(Math.random() * alphabet.length)];
 
     let sequence: string[] = [];
+    let solution: boolean[] = [];
+
     const startIndex = Math.floor(Math.random() * (alphabet.length - 10));
 
     for (let i = startIndex; i < startIndex + 10; i++) {
-        const letter = alphabet[i];
-        const randomBetween1 = randomLetter();
-        const randomBetween2 = randomLetter();
+        const mainLetter = alphabet[i];
+        const randomBetweenCount = Math.floor(Math.random() * 3) + 1; // 1 to 3 random letters
 
-        sequence.push(letter, randomBetween1, letter, randomBetween2);
+        // Push the main letter
+        sequence.push(mainLetter);
+        solution.push(true); // True, as it's a main letter
+
+        // Push the random letters between the main letters
+        for (let j = 0; j < randomBetweenCount; j++) {
+            sequence.push(randomLetter());
+            solution.push(false); // False, as these are random letters
+        }
+
+        // Repeat the main letter again
+        sequence.push(mainLetter);
+        solution.push(true); // True, as it's a main letter
     }
 
+    // Limit the sequence to 20 items
     sequence = sequence.slice(0, 20);
+    solution = solution.slice(0, 20);
 
+    // Ensure the last letter isn't the same as the first or second-to-last letter
     const firstLetter = sequence[0];
     const secondLastLetter = sequence[sequence.length - 2];
     let lastLetter = sequence[sequence.length - 1];
@@ -147,13 +152,14 @@ function generateCharacterArray(): string[] {
     }
 
     sequence[sequence.length - 1] = lastLetter;
+    solution[solution.length - 1] = true; // Last letter should be part of the main sequence
 
-    return sequence;
+    return { sequence, solution };
 }
 
 const GamePage: React.FC = () => {
     const [changePage, setChangePage] = useState<boolean>(false);
-    const [countdown, setCountdown] = useState<number>(5);
+    const [countdown, setCountdown] = useState<number>(1);
 
     useEffect(() => {
         const interval = setInterval(() => {
