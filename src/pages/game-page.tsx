@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
 
 // Props for the Instructions component
@@ -6,14 +6,15 @@ interface InstructionsProps {
     countdown: number;
 }
 
-const Instructions: React.FC<InstructionsProps> = ({ countdown }) => {
+const Instructions: React.FC<InstructionsProps> = ({countdown}) => {
     return (
         <div className="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 mx-auto">
             <h4 className="mb-4 text-5xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl lg:text-5xl dark:text-white">
                 Instructions
             </h4>
             <p className="mb-6 text-xl font-normal text-gray-500 lg:text-2xl sm:px-16 xl:px-48 dark:text-gray-400 text-center pb-16">
-                In the N-Back task, participants are presented a sequence of stimuli one-by-one. For each stimulus, they need to decide if the current stimulus is the same as the one presented N trials ago.
+                In the N-Back task, participants are presented a sequence of stimuli one-by-one. For each stimulus, they
+                need to decide if the current stimulus is the same as the one presented N trials ago.
             </p>
             <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">
                 Starting in {countdown}...
@@ -27,7 +28,7 @@ interface ScoreDisplayProps {
     total: number;  // The total possible score
 }
 
-const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, total }) => {
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({score, total}) => {
     return (
         <div className="flex items-center justify-center h-screen">
             <div className="text-center">
@@ -35,7 +36,8 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, total }) => {
                     Your score is {score}/{total}
                 </h1>
                 <Link to="/">
-                    <button className="bg-blue-500 text-white ml-4 text-2xl px-32 py-4 hover:bg-sky-700 transition rounded-lg">
+                    <button
+                        className="bg-blue-500 text-white ml-4 text-2xl px-32 py-4 hover:bg-sky-700 transition rounded-lg">
                         Go back home
                     </button>
                 </Link>
@@ -54,7 +56,7 @@ const GameComponent: React.FC = () => {
     const [intervalState, setIntervalState] = useState<NodeJS.Timer>(); // Countdown state
 
     useEffect(() => {
-        const { sequence, solution } = generateCharacterArray(); // Get the sequence and solution array
+        const {sequence, solution} = generateCharacterArray(); // Get the sequence and solution array
         setCharacters(sequence);
         setSolution(solution);
         const answersData = new Array(sequence.length).fill(false)
@@ -89,7 +91,7 @@ const GameComponent: React.FC = () => {
         setCurrentCharacter(characters[currentIndex])
     }, [characters, characters.length, currentIndex, intervalState]);
 
-    if (characters.length  === currentIndex) {
+    if (characters.length === currentIndex) {
         const results = answers.reduce((count, value) => count + (value ? 1 : 0), 0);
         return <ScoreDisplay score={results} total={characters.length}/>
     }
@@ -122,26 +124,26 @@ const GameComponent: React.FC = () => {
                 <p className="text-2xl mt-4 text-gray-300">Letter: {currentIndex + 1}/{characters.length}</p>
                 <p className="text-lg text-gray-400 mt-2">Next letter in {countdown}s</p>
             </div>
-
-            <p className="text-xl mb-4 text-gray-400">
-                Is this part of the main sequence?
-            </p>
-
             {currentIndex > 0 && (
-                <div className="flex space-x-4">
-                    <button
-                        className="bg-green-500 text-white px-4 py-2 rounded"
-                        onClick={() => handleButtonClick(true)}
-                    >
-                        True
-                    </button>
-                    <button
-                        className="bg-red-500 text-white px-4 py-2 rounded"
-                        onClick={() => handleButtonClick(false)}
-                    >
-                        False
-                    </button>
-                </div>
+                <>
+                    <p className="text-xl mb-4 text-gray-400">
+                        Is this part of the main sequence?
+                    </p>
+                    <div className="flex space-x-4">
+                        <button
+                            className="bg-green-500 text-white px-4 py-2 rounded"
+                            onClick={() => handleButtonClick(true)}
+                        >
+                            True
+                        </button>
+                        <button
+                            className="bg-red-500 text-white px-4 py-2 rounded"
+                            onClick={() => handleButtonClick(false)}
+                        >
+                            False
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );
@@ -212,7 +214,7 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
         solution.push(false); // These are random letters
     }
 
-    return { sequence, solution };
+    return {sequence, solution};
 }
 
 
@@ -237,7 +239,7 @@ const GamePage: React.FC = () => {
 
     return (
         <div className="flex flex-col justify-center items-center h-screen">
-            {changePage ? <GameComponent /> : <Instructions countdown={countdown} />}
+            {changePage ? <GameComponent/> : <Instructions countdown={countdown}/>}
         </div>
     );
 };
