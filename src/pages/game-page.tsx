@@ -163,6 +163,7 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
     let solution: boolean[] = [];
 
     const mainLetters: string[] = [];
+    const usedLetters = new Set<string>(); // To track used main letters
     const numMainLetters = 5; // Adjust this number based on how many main letters you want
 
     // Randomly select unique main letters
@@ -170,9 +171,10 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
         const randomIndex = Math.floor(Math.random() * alphabet.length);
         const mainLetter = alphabet[randomIndex];
 
-        // Avoid duplicates
-        if (!mainLetters.includes(mainLetter)) {
+        // Avoid duplicates and ensure it's not already used
+        if (!mainLetters.includes(mainLetter) && !usedLetters.has(mainLetter)) {
             mainLetters.push(mainLetter);
+            usedLetters.add(mainLetter); // Mark this letter as used
         }
     }
 
@@ -182,9 +184,9 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
 
         // Push the first main letter
         sequence.push(mainLetter);
-        solution.push(false); // Main letters are true
+        solution.push(false); // This occurrence is the first, set to false for the solution
 
-        // Generate random letters (1 to 3) in between
+        // Generate random letters (1 to 2) in between (adjusting to avoid more than 2)
         const randomBetweenCount = Math.floor(Math.random() * 2) + 1;
 
         for (let j = 0; j < randomBetweenCount; j++) {
