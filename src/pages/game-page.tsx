@@ -12,7 +12,7 @@ const Instructions: React.FC<InstructionsProps> = ({ countdown }) => {
             <h4 className="mb-4 text-5xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl lg:text-5xl dark:text-white">
                 Instructions
             </h4>
-            <p className="mb-6 text-xl font-normal text-gray-500 lg:text-2xl sm:px-16 xl:px-48 dark:text-gray-400 text-center pb-16 text-justify">
+            <p className="mb-6 text-xl font-normal text-gray-500 lg:text-2xl sm:px-16 xl:px-48 dark:text-gray-400 text-center pb-16">
                 In the N-Back task, participants are presented a sequence of stimuli one-by-one. For each stimulus, they need to decide if the current stimulus is the same as the one presented N trials ago.
             </p>
             <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">
@@ -57,7 +57,6 @@ const GameComponent: React.FC = () => {
         const { sequence, solution } = generateCharacterArray(); // Get the sequence and solution array
         setCharacters(sequence);
         setSolution(solution);
-        console.log(sequence, solution)
         const answersData = new Array(sequence.length).fill(false)
         answersData[0] = true
         setAnswers(answersData); // Initialize answers array
@@ -91,7 +90,6 @@ const GameComponent: React.FC = () => {
     }, [characters, characters.length, currentIndex, intervalState]);
 
     if (characters.length  === currentIndex) {
-        console.log(answers)
         const results = answers.reduce((count, value) => count + (value ? 1 : 0), 0);
         return <ScoreDisplay score={results} total={characters.length}/>
     }
