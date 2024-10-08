@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import {Link} from "react-router-dom";
 
 // Props for the Instructions component
 interface InstructionsProps {
@@ -21,21 +22,44 @@ const Instructions: React.FC<InstructionsProps> = ({ countdown }) => {
     );
 };
 
+interface ScoreDisplayProps {
+    score: number;  // The current score
+    total: number;  // The total possible score
+}
+
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, total }) => {
+    return (
+        <div className="flex items-center justify-center h-screen">
+            <div className="text-center">
+                <h1 className="text-5xl font-bold text-white pb-3">
+                    Your score is {score}/{total}
+                </h1>
+                <Link to="/">
+                    <button className="bg-blue-500 text-white ml-4 text-2xl px-32 py-4 hover:bg-sky-700 transition rounded-lg">
+                        Go back home
+                    </button>
+                </Link>
+            </div>
+        </div>
+    );
+};
+
 const GameComponent: React.FC = () => {
     const [characters, setCharacters] = useState<string[]>([]);
     const [solution, setSolution] = useState<boolean[]>([]); // Solution array to track true/false for main letters
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [currentCharacter, setCurrentCharacter] = useState<string | null>(null);
     const [answers, setAnswers] = useState<boolean[]>([]); // Track user's answers
-    const [countdown, setCountdown] = useState<number>(3); // Countdown state
+    const [countdown, setCountdown] = useState<number>(4); // Countdown state
     const [intervalState, setIntervalState] = useState<NodeJS.Timer>(); // Countdown state
 
     useEffect(() => {
         const { sequence, solution } = generateCharacterArray(); // Get the sequence and solution array
         setCharacters(sequence);
         setSolution(solution);
-        console.log(sequence, solution)
-        setAnswers(new Array(sequence.length).fill(false)); // Initialize answers array
+        const answersData = new Array(sequence.length).fill(false)
+        answersData[0] = true
+        setAnswers(answersData); // Initialize answers array
 
         // Set the first character to be displayed initially
         setCurrentCharacter(sequence[0]);
@@ -51,7 +75,7 @@ const GameComponent: React.FC = () => {
 
     useEffect(() => {
         if (countdown === 0 && currentIndex <= characters.length - 1) {
-            setCountdown(3)
+            setCountdown(4)
             setCurrentIndex(currentIndex => currentIndex + 1)
         }
     }, [characters.length, countdown, currentIndex]);
@@ -66,14 +90,17 @@ const GameComponent: React.FC = () => {
         setCurrentCharacter(characters[currentIndex])
     }, [characters, characters.length, currentIndex, intervalState]);
 
-    useEffect(() => {
-        console.log(answers)
-    }, [answers]);
+    if (characters.length - 1 === currentIndex) {
+        const results = answers.reduce((count, value) => count + (value ? 1 : 0), 0);
+        return <ScoreDisplay score={results} total={characters.length}/>
+    }
 
     const handleButtonClick = (isTrue: boolean) => {
         // Check if the user's selection matches the solution
 
-        if (currentIndex === characters.length - 1) return;
+        if (currentIndex === characters.length - 1) {
+            return;
+        }
 
         const isCorrect = isTrue === solution[currentIndex];
 
@@ -93,7 +120,7 @@ const GameComponent: React.FC = () => {
         <div className="flex flex-col justify-center items-center h-screen">
             <div className="text-center mb-8">
                 <h1 className="text-8xl font-bold text-white">{currentCharacter}</h1>
-                <p className="text-2xl mt-4 text-gray-300">Letters left: {characters.length - currentIndex - 1}</p>
+                <p className="text-2xl mt-4 text-gray-300">Letter: {currentIndex + 1}/{characters.length}</p>
                 <p className="text-lg text-gray-400 mt-2">Next letter in {countdown}s</p>
             </div>
 
@@ -124,43 +151,61 @@ const GameComponent: React.FC = () => {
 // Updated generateCharacterArray function
 function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const randomLetter = () => alphabet[Math.floor(Math.random() * alphabet.length)];
+    const randomLetter = (exclude: string) => {
+        let letter;
+        do {
+            letter = alphabet[Math.floor(Math.random() * alphabet.length)];
+        } while (letter === exclude); // Ensure the letter is not the same as the excluded letter
+        return letter;
+    };
 
     let sequence: string[] = [];
     let solution: boolean[] = [];
-    let usedLetters = new Set<string>(); // Set to track used letters
 
-    const startIndex = Math.floor(Math.random() * (alphabet.length - 10));
+    const mainLetters: string[] = [];
+    const numMainLetters = 5; // Adjust this number based on how many main letters you want
 
-    for (let i = startIndex; i < startIndex + 10; i++) {
-        const mainLetter = alphabet[i];
+    // Randomly select unique main letters
+    while (mainLetters.length < numMainLetters) {
+        const randomIndex = Math.floor(Math.random() * alphabet.length);
+        const mainLetter = alphabet[randomIndex];
 
-        // Push the main letter
-        sequence.push(mainLetter);
-        solution.push(true); // True, as it's a main letter
-        usedLetters.add(mainLetter); // Mark this letter as used
-
-        // Push random letters between the main letters
-        const randomBetweenCount = Math.floor(Math.random() * 3) + 1; // 1 to 3 random letters
-        for (let j = 0; j < randomBetweenCount; j++) {
-            let randomChar;
-            do {
-                randomChar = randomLetter();
-            } while (usedLetters.has(randomChar)); // Ensure the letter hasn't been used
-
-            sequence.push(randomChar);
-            solution.push(false); // False, as these are random letters
-            usedLetters.add(randomChar); // Mark this letter as used
+        // Avoid duplicates
+        if (!mainLetters.includes(mainLetter)) {
+            mainLetters.push(mainLetter);
         }
     }
 
-    // Limit the sequence to 20 items
-    sequence = sequence.slice(0, 20);
-    solution = solution.slice(0, 20);
+    // Build the sequence
+    for (let i = 0; i < mainLetters.length; i++) {
+        const mainLetter = mainLetters[i];
+
+        // Push the first main letter
+        sequence.push(mainLetter);
+        solution.push(false); // Main letters are true
+
+        // Generate random letters (1 to 3) in between
+        const randomBetweenCount = Math.floor(Math.random() * 2) + 1;
+
+        for (let j = 0; j < randomBetweenCount; j++) {
+            const randomChar = randomLetter(mainLetter); // Exclude the current main letter
+            sequence.push(randomChar);
+            solution.push(false); // Random letters are false
+        }
+
+        // Push the same main letter again
+        sequence.push(mainLetter);
+        solution.push(true); // Second occurrence of the main letter is true
+    }
+
+    // Limit the sequence to 20 items if needed
+    while (sequence.length > 20) {
+        sequence.pop();
+        solution.pop();
+    }
 
     return { sequence, solution };
 }
-
 
 const GamePage: React.FC = () => {
     const [changePage, setChangePage] = useState<boolean>(false);
