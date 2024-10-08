@@ -128,26 +128,30 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
 
     let sequence: string[] = [];
     let solution: boolean[] = [];
+    let usedLetters = new Set<string>(); // Set to track used letters
 
     const startIndex = Math.floor(Math.random() * (alphabet.length - 10));
 
     for (let i = startIndex; i < startIndex + 10; i++) {
         const mainLetter = alphabet[i];
-        const randomBetweenCount = Math.floor(Math.random() * 3) + 1; // 1 to 3 random letters
 
         // Push the main letter
         sequence.push(mainLetter);
         solution.push(true); // True, as it's a main letter
+        usedLetters.add(mainLetter); // Mark this letter as used
 
-        // Push the random letters between the main letters
+        // Push random letters between the main letters
+        const randomBetweenCount = Math.floor(Math.random() * 3) + 1; // 1 to 3 random letters
         for (let j = 0; j < randomBetweenCount; j++) {
-            sequence.push(randomLetter());
-            solution.push(false); // False, as these are random letters
-        }
+            let randomChar;
+            do {
+                randomChar = randomLetter();
+            } while (usedLetters.has(randomChar)); // Ensure the letter hasn't been used
 
-        // Repeat the main letter again
-        sequence.push(mainLetter);
-        solution.push(true); // True, as it's a main letter
+            sequence.push(randomChar);
+            solution.push(false); // False, as these are random letters
+            usedLetters.add(randomChar); // Mark this letter as used
+        }
     }
 
     // Limit the sequence to 20 items
@@ -156,6 +160,7 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
 
     return { sequence, solution };
 }
+
 
 const GamePage: React.FC = () => {
     const [changePage, setChangePage] = useState<boolean>(false);
