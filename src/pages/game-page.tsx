@@ -57,6 +57,7 @@ const GameComponent: React.FC = () => {
         const { sequence, solution } = generateCharacterArray(); // Get the sequence and solution array
         setCharacters(sequence);
         setSolution(solution);
+        console.log(sequence, solution)
         const answersData = new Array(sequence.length).fill(false)
         answersData[0] = true
         setAnswers(answersData); // Initialize answers array
@@ -74,23 +75,23 @@ const GameComponent: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (countdown === 0 && currentIndex <= characters.length - 1) {
+        if (countdown === 0 && currentIndex <= characters.length) {
             setCountdown(4)
             setCurrentIndex(currentIndex => currentIndex + 1)
         }
     }, [characters.length, countdown, currentIndex]);
 
     useEffect(() => {
-        if (currentIndex === characters.length - 1) {
-            //TODO: render next component
+        if (currentIndex === characters.length) {
             clearInterval(intervalState)
-            setCurrentIndex(characters.length - 1)
+            setCurrentIndex(characters.length)
             return;
         }
         setCurrentCharacter(characters[currentIndex])
     }, [characters, characters.length, currentIndex, intervalState]);
 
-    if (characters.length - 1 === currentIndex) {
+    if (characters.length  === currentIndex) {
+        console.log(answers)
         const results = answers.reduce((count, value) => count + (value ? 1 : 0), 0);
         return <ScoreDisplay score={results} total={characters.length}/>
     }
@@ -98,7 +99,7 @@ const GameComponent: React.FC = () => {
     const handleButtonClick = (isTrue: boolean) => {
         // Check if the user's selection matches the solution
 
-        if (currentIndex === characters.length - 1) {
+        if (currentIndex === characters.length) {
             return;
         }
 
