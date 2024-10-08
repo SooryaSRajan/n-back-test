@@ -149,7 +149,6 @@ const GameComponent: React.FC = () => {
     );
 };
 
-// Updated generateCharacterArray function
 function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const randomLetter = (exclude: string) => {
@@ -191,7 +190,10 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
         const randomBetweenCount = Math.floor(Math.random() * 2) + 1;
 
         for (let j = 0; j < randomBetweenCount; j++) {
-            const randomChar = randomLetter(mainLetter); // Exclude the current main letter
+            let randomChar;
+            do {
+                randomChar = randomLetter(mainLetter); // Exclude the current main letter
+            } while (mainLetters.includes(randomChar)); // Ensure it's not a main letter
             sequence.push(randomChar);
             solution.push(false); // Random letters are false
         }
@@ -201,14 +203,20 @@ function generateCharacterArray(): { sequence: string[], solution: boolean[] } {
         solution.push(true); // Second occurrence of the main letter is true
     }
 
-    // Limit the sequence to 20 items if needed
-    while (sequence.length > 20) {
-        sequence.pop();
-        solution.pop();
+    // Ensure we have exactly 20 items in the sequence
+    while (sequence.length < 20) {
+        let randomChar;
+        do {
+            randomChar = randomLetter(""); // No need to exclude since we're just filling gaps
+        } while (mainLetters.includes(randomChar)); // Ensure it's not a main letter
+
+        sequence.push(randomChar);
+        solution.push(false); // These are random letters
     }
 
     return { sequence, solution };
 }
+
 
 const GamePage: React.FC = () => {
     const [changePage, setChangePage] = useState<boolean>(false);
